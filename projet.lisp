@@ -8,7 +8,13 @@
 
 (defvar *window*)
 
+(defvar coquillesGlobal)
+(defvar jaunesGlobal)
+(defvar succesGlobal)
+
 (defun experiment ()
+  (setf coquillesGlobal 0)
+  (setf jaunesGlobal 0)
 
   (setf *window* (open-exp-window "Choice Experiment" :visible t))
     
@@ -27,6 +33,13 @@
   (define-chunks-fct `((isa butObtenirTexture couleurActuelle 0 volumeActuel 0 vitesseActuelle 0 energie 1100 statut startFouettage)))
 
   (run-full-time 100)
+
+  (princ "coquilles : ")
+  (write coquillesGlobal)
+  (princ " jaunes : ")
+  (write jaunesGlobal)
+  (princ " succes : ")
+  (write succes)
 )
 
 (defun oeuf-casse (button)
@@ -38,7 +51,7 @@
 
 (define-model oeufs-neige-model 
 
-  (sgp :v t :show-focus t :trace-detail medium :ult t)
+  (sgp :v t :show-focus t :trace-detail medium :ul t :ult t)
 
     ;; do not change these parameters
   (sgp :esc t :bll .5 :ol t :er t :lf 0)
@@ -179,13 +192,14 @@
     ?manual>
       state  free
     ==>
-    !bind!  =nouveauNombreCoquille (+ =nombreCoquilles (act-r-random 4))
+    !bind! =nouveauNombreCoquille 1
+    !bind! =command1 (setf coquillesGlobal (+ coquillesGlobal =nouveauNombreCoquille))
     +manual>
       isa         click-mouse
     =goal>
       statut      oeufCasse
       nbCoquilles   =nouveauNombreCoquille
-
+    !output!        =nouveauNombreCoquille
   )
 
   (P separerOeufAvecJaune
@@ -196,6 +210,7 @@
     ==>
    !bind! =nombre   (+ =nombreBlancs 1)
    !bind! =nouveauNombreJaunes  (+ =nombresJaunes 1)
+   !bind! =command2 (setf jaunesGlobal (+ jaunesGlobal =nouveauNombreJaunes))
     =goal>
       nbJaunes    =nouveauNombreJaunes
       nbBlancs    =nombre
@@ -214,9 +229,6 @@
       nbBlancs    =nombre
       statut      oeufSepare
   )
-
-
-
 
   (P verifierPasCoquille
     =goal>
@@ -487,7 +499,6 @@
       volumeActuel      =volume
       vitesseMouvement  =vitesse
       resultat          succes
-    !output! (=ener)
   )
 
   (P comparerTextureKO ;; rappel de la texture parfaite réussi mais la texture actuelle y est différente
@@ -523,7 +534,7 @@
     =goal>
       statut      echec
     +imaginal>
-      ISA experienceFouettage
+      ISA   
       couleurActuelle   =couleur
       volumeActuel      =volume
       vitesseMouvement  =vitesse
@@ -549,6 +560,7 @@
        buffer full
      ==>
      -imaginal>
+      !bind! =command3 (setf succes 0)
   )
 
   (P finirExperimentSucces
@@ -560,5 +572,11 @@
        buffer full
      ==>
      -imaginal>
+    !bind! =command3 (setf succes 1)
   )
+
+  (spp casserOeufSansCoquille :reward 1)
+  (spp separerOeufSansJaune :reward 1)
+  (spp casserOeufAvecCoquille :reward -1)
+  (spp separerOeufAvecJaune :reward -1)
 )
