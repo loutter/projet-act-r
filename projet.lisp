@@ -65,10 +65,10 @@
   (install-device *window*)
   (allow-event-manager *window*)  
 
-  (add-button-to-exp-window :x 20   :y 20  :height 24 :width 24 :text "0"     :action 'oeuf-casse)
-  (add-button-to-exp-window :x 60   :y 20  :height 24 :width 24 :text "0"     :action 'oeuf-casse)
-  (add-button-to-exp-window :x 100  :y 20  :height 24 :width 24 :text "0"     :action 'oeuf-casse)
-  (add-button-to-exp-window :x 140  :y 20  :height 24 :width 24 :text "0"     :action 'oeuf-casse)
+  (add-button-to-exp-window :x 20  :y 20 :height 24 :width 24 :text "0" :action 'oeuf-casse)
+  (add-button-to-exp-window :x 60  :y 20 :height 24 :width 24 :text "0" :action 'oeuf-casse)
+  (add-button-to-exp-window :x 100 :y 20 :height 24 :width 24 :text "0" :action 'oeuf-casse)
+  (add-button-to-exp-window :x 140 :y 20 :height 24 :width 24 :text "0" :action 'oeuf-casse)
 
   (proc-display)  
 
@@ -84,6 +84,8 @@
   (write jaunesGlobal)
   (princ " succes : ")
   (write succesGlobal)
+  
+  ;; (list coquillesGlobal jaunesGlobal succesGlobal)
 )
 
 (defun oeuf-casse (button)
@@ -563,7 +565,7 @@
     =goal>
       statut      echec
     +imaginal>
-      ISA   
+      ISA experienceFouettage
       couleurActuelle   =couleur
       volumeActuel      =volume
       vitesseMouvement  =vitesse
