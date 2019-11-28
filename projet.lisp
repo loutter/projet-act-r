@@ -58,6 +58,7 @@
 (defun experiment ()
   (setf coquillesGlobal 0)
   (setf jaunesGlobal 0)
+  (setf succesGlobal nil)
 
   (setf *window* (open-exp-window "Choice Experiment" :visible t))
     
@@ -82,7 +83,7 @@
   (princ " jaunes : ")
   (write jaunesGlobal)
   (princ " succes : ")
-  (write succes)
+  (write succesGlobal)
 )
 
 (defun oeuf-casse (button)
@@ -96,7 +97,7 @@
 
   (sgp :v t :show-focus t :trace-detail medium :ul t :ult t)
 
-    ;; do not change these parameters
+  ;; do not change these parameters
   (sgp :esc t :bll .5 :ol t :er t :lf 0)
   
   ;; adjust these as needed
@@ -151,7 +152,6 @@
     (verifierTexture isa chunk)
     (comparerTexture isa chunk)
     (verifierEnergie isa chunk)
-    (blancsEnNeigeObtenus isa chunk)
   )
 
   (start-hand-at-mouse)
@@ -521,7 +521,7 @@
     ==>
     !bind! =but (goal-focus goalAvoirBlancsEnNeige)
     =goal>
-      statut      blancsEnNeigeObtenus
+      statut      succes
     +imaginal>
       ISA experienceFouettage
       couleurActuelle   =couleur
@@ -561,7 +561,7 @@
     ==>
     !bind! =but (goal-focus goalAvoirBlancsEnNeige)
     =goal>
-      statut      blancsEnNeigeObtenus
+      statut      echec
     +imaginal>
       ISA   
       couleurActuelle   =couleur
@@ -580,7 +580,7 @@
       statut      fouetter
   )
 
-  (P finirExperimentEchec
+  (P finirExperienceEchec ;; on termine l'expérience en vidant le buffer imaginaire pour finaliser l'apprentissage
     =goal>
       ISA         butAvoirBlancsEnNeige
       statut      echec
@@ -589,19 +589,19 @@
        buffer full
      ==>
      -imaginal>
-      !bind! =command3 (setf succes 0)
+    !bind! =command3 (setf succesGlobal 0)
   )
 
-  (P finirExperience ;; on termine l'expérience en vidant le buffer imaginaire pour finaliser l'apprentissage
+  (P finirExperienceSucces ;; on termine l'expérience en vidant le buffer imaginaire pour finaliser l'apprentissage
     =goal>
       ISA         butAvoirBlancsEnNeige
-      statut      blancsEnNeigeObtenus
+      statut      succes
     ?imaginal>
        state free
        buffer full
      ==>
      -imaginal>
-    !bind! =command3 (setf succes 1)
+    !bind! =command3 (setf succesGlobal 1)
   )
 
   (spp casserOeufSansCoquille :reward 1)
