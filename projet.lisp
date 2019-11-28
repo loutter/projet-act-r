@@ -1,3 +1,11 @@
+;===============================;
+;   Johana Cohen                ;
+;   Sandra De La Purification   ;
+;   Leo Pecault                 ;
+;   Farah Rebiha                ;
+;   Aurelien Vauthier           ;
+;===============================;
+
 (defvar *window*)
 
 (defun experiment ()
