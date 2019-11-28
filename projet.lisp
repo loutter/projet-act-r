@@ -8,6 +8,49 @@
 
 (defvar *window*)
 
+(defun show-learning (n &optional (graph t) (game 'game0))
+  (let ((data nil))
+    (dotimes (i n)
+      (reset)
+      (if (null data)
+          (setf data (experiment))
+        (setf data (mapcar (lambda (x y) (mapcar '+ x y)) data (run-blocks 20 5)))
+      )
+    )
+    (let ((percentages (mapcar (lambda (x) (/ (car x) (* n 5.0))) data)))
+      (when graph
+        (draw-graph percentages)
+      )
+      (list (list (/ (apply '+ (subseq percentages 0 5)) 5)
+                  (/ (apply '+ (subseq percentages 5 10)) 5)
+                  (/ (apply '+ (subseq percentages 10 15)) 5)
+                  (/ (apply '+ (subseq percentages 15 20)) 5))
+                  percentages
+      )
+    )
+  )
+)
+
+(defun draw-graph (points)
+  (let ((w (open-exp-window "Data" :width 550 :height 460 :visible t)))
+    (allow-event-manager w)
+    (add-line-to-exp-window '(50 0) '(50 420) :color 'white :window "Data")
+    (dotimes (i 11)
+      (add-text-to-exp-window :x 5 :y (+ 5 (* i 40)) :width 35 :text (format nil "~3,1f" (- 1 (* i .1))) :window "Data")
+      (add-line-to-exp-window (list 45 (+ 10 (* i 40))) (list 550 (+ 10 (* i 40))) :color 'white :window "Data")
+    )
+    
+    (let ((x 50))
+      (mapcar (lambda (a b) (add-line-to-exp-window (list x (floor (- 410 (* a 400))))
+                                                  (list (incf x 25) (floor (- 410 (* b 400))))
+                                                    :color 'blue :window "Data"))
+        (butlast points) (cdr points)
+      )
+    )
+    (allow-event-manager w)
+  )
+)
+
 (defun experiment ()
 
   (setf *window* (open-exp-window "Choice Experiment" :visible t))
@@ -88,15 +131,14 @@
     (blancsObtenus isa chunk)
     (move-mouse isa chunk)
     (recupererVitesse isa chunk)
+    (recupererVitesseManqueEnergie isa chunk)
     (augmenterVitesse isa chunk)
     (diminuerVitesse isa chunk)
     (fouetter isa chunk)
     (verifierTexture isa chunk)
     (comparerTexture isa chunk)
     (verifierEnergie isa chunk)
-    (recupererVitesseSucces isa chunk)
-    (pasDeSucces isa chunk)
-    (recupererVitesseManqueEnergie isa chunk)
+    (blancsEnNeigeObtenus isa chunk)
   )
 
   (start-hand-at-mouse)
@@ -337,10 +379,9 @@
       resultat    succes
   )
 
-  (P recupererVitesseSuccesOK ;; rappel de la vitesse réussi et la précédente run était un succès
+  (P recupererVitesseSuccesOK ;; rappel de la vitesse avec la précédente run étant un succès réussi
     =goal>
       ISA         butObtenirTexture
-      statut      recupererVitesse
     =retrieval>
       ISA         experienceFouettage
       resultat    succes
@@ -352,7 +393,7 @@
     @retrieval> ;; pour vider le buffer sans impacter l'apprentissage
   )
 
-  (P recupererVitesseSuccesKO ;; rappel de la vitesse réussi et la précédente run était un échec
+  (P recupererVitesseSuccesKO ;; échec du rappel de la vitesse avec la précédente run étant un succès
     =goal>
       ISA         butObtenirTexture
       statut      recupererVitesse
@@ -366,19 +407,7 @@
       resultat    manqueEnergie 
   )
 
-  ; (P recupererVitesseManqueEnergie ;; récupérer la vitesse d'une précédente tentative comme référence pour cette run 
-  ;   =goal>
-  ;     ISA         butObtenirTexture
-  ;     statut      pasDeSucces
-  ;   ==>
-  ;   =goal>
-  ;     statut      recupererVitesseManqueEnergie
-  ;   +retrieval>
-  ;     ISA         experienceFouettage
-  ;     resultat    manqueEnergie 
-  ; )
-
-  (P recupererVitesseManqueEnergieOK ;; rappel de la vitesse réussi et la précédente run était un echec dû au manque d'énergie
+  (P recupererVitesseManqueEnergieOK ;; rappel de la vitesse avec la précédente run étant un manque d'énergie réussi
     =goal>
       ISA         butObtenirTexture
     =retrieval>
@@ -392,7 +421,7 @@
     @retrieval> ;; pour vider le buffer sans impacter l'apprentissage
   )
 
-  (P recupererVitesseManqueEnergieKO ;; rappel de la vitesse à échoué, on choisi une vitesse par défaut aléatoire
+  (P recupererVitesseManqueEnergieKO ;; échec du rappel de la vitesse, on choisi une vitesse par défaut aléatoire
     =goal>
       ISA         butObtenirTexture
       statut      recupererVitesseManqueEnergie
@@ -405,7 +434,7 @@
       vitesseActuelle =vitesse
   )
 
-  (P baisserVitesse ;; tentative d'adapter la vitesse d'une précédente run échoué en l'augmentant un peu
+  (P baisserVitesse ;; Adapter la vitesse d'une précédente run échoué par manque d'énergie en la diminuant un peu
     =goal>
       ISA         butObtenirTexture
       statut      diminuerVitesse
@@ -417,7 +446,7 @@
       vitesseActuelle =nouvelleVitesse
   )
 
-  (P augmenterVitesse ;; tentative d'adapter la vitesse d'une précédente run échoué en l'augmentant un peu
+  (P augmenterVitesse ;; Perfectionner la vitesse d'une précédente run réussi en l'augmentant un peu
     =goal>
       ISA         butObtenirTexture
       statut      augmenterVitesse
@@ -480,7 +509,7 @@
     ==>
     !bind! =but (goal-focus goalAvoirBlancsEnNeige)
     =goal>
-      statut      succes
+      statut      blancsEnNeigeObtenus
     +imaginal>
       ISA experienceFouettage
       couleurActuelle   =couleur
@@ -521,7 +550,7 @@
     ==>
     !bind! =but (goal-focus goalAvoirBlancsEnNeige)
     =goal>
-      statut      echec
+      statut      blancsEnNeigeObtenus
     +imaginal>
       ISA experienceFouettage
       couleurActuelle   =couleur
@@ -540,21 +569,10 @@
       statut      fouetter
   )
 
-  (P finirExperimentEchec
+  (P finirExperiance ;; on termine l'expériance en vidant le buffer imaginaire pour finaliser l'apprentissage
     =goal>
       ISA         butAvoirBlancsEnNeige
-      statut      echec
-    ?imaginal>
-       state free
-       buffer full
-     ==>
-     -imaginal>
-  )
-
-  (P finirExperimentSucces
-    =goal>
-      ISA         butAvoirBlancsEnNeige
-      statut      succes
+      statut      blancsEnNeigeObtenus
     ?imaginal>
        state free
        buffer full
