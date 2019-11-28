@@ -85,7 +85,7 @@
   (princ " succes : ")
   (write succesGlobal)
   
-  ;; (list coquillesGlobal jaunesGlobal succesGlobal)
+  (list coquillesGlobal jaunesGlobal succesGlobal)
 )
 
 (defun oeuf-casse (button)
