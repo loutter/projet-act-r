@@ -17,7 +17,7 @@
   (setf jaunesGlobal 0)
   (setf succesGlobal nil)
 
-  (setf *window* (open-exp-window "Choice Experiment" :visible t))
+  (setf *window* (open-exp-window "Choice Experiment" :visible nil))
     
   (install-device *window*)
   (allow-event-manager *window*)  
@@ -34,13 +34,6 @@
   (define-chunks-fct `((isa butObtenirTexture couleurActuelle 0 volumeActuel 0 vitesseActuelle 0 energie 1100 statut startFouettage)))
 
   (run-full-time 10)
-
-  (princ "coquilles : ")
-  (write coquillesGlobal)
-  (princ " jaunes : ")
-  (write jaunesGlobal)
-  (princ " succes : ")
-  (write succesGlobal)
   
   (list coquillesGlobal jaunesGlobal succesGlobal)
 )
@@ -51,6 +44,43 @@
     (dotimes (i n (reverse res))
       (push (experiment) res)
     )
+    ;; (write res)
+  )
+)
+
+(defun show-learning (n)
+  (let ((data nil))
+    (dotimes (i n)
+      (if (null data)
+        (setf data (learning 5))
+        (setf data (mapcar (lambda (x y) (mapcar '+ x y)) data (learning 5)))
+      )
+    )
+    (let ((percentages (mapcar (lambda (experience) (mapcar (lambda (x) (/ x n)) experience)) data) ))
+      (draw-graph percentages)
+    )
+    (print "Data: ")
+    (write data)
+  )
+)
+
+(defun draw-graph (points)
+  (let ((w (open-exp-window "Data" :width 550 :height 460 :visible t)))
+    (allow-event-manager w)
+    (add-line-to-exp-window '(50 0) '(50 420) :color 'white :window "Data")
+    (dotimes (i 11)
+      (add-text-to-exp-window :x 5 :y (+ 5 (* i 40)) :width 35 :text (format nil "~3,1f" (- 1 (* i .1))) :window "Data")
+      (add-line-to-exp-window (list 45 (+ 10 (* i 40))) (list 550 (+ 10 (* i 40))) :color 'white :window "Data")
+    )
+    
+    (let ((x 50))
+      (mapcar (lambda (a b) (add-line-to-exp-window (list x (floor (- 410 (* a 400))))
+                                                  (list (incf x 25) (floor (- 410 (* b 400))))
+                                                    :color 'blue :window "Data"))
+        (butlast points) (cdr points)
+      )
+    )
+    (allow-event-manager w)
   )
 )
 
@@ -63,7 +93,7 @@
 
 (define-model oeufs-neige-model 
 
-  (sgp :v t :show-focus t :trace-detail medium :ul t :ult t)
+  (sgp :v nil :show-focus t :trace-detail medium :ul t :ult t)
 
   ;; do not change these parameters
   (sgp :esc t :bll .5 :ol t :er t :lf 0)
