@@ -34,6 +34,7 @@
   (define-chunks-fct `((isa butObtenirTexture couleurActuelle 0 volumeActuel 0 vitesseActuelle 0 energie 1100 statut startFouettage)))
 
   (run-full-time 10)
+
   
   (list (/ coquillesGlobal 4) (/ jaunesGlobal 4) succesGlobal)
 )
@@ -105,7 +106,7 @@
   (sgp :v nil :show-focus t :trace-detail medium :ul t :ult t)
 
   ;; do not change these parameters
-  (sgp :esc t :egs 2 :bll .5 :ol t :er t :lf 0)
+  (sgp :esc t :egs 0.5 :bll .5 :ol t :er t :lf 0)
   
   ;; adjust these as needed
   (sgp :ans .2 :mp 10.0 :rt -60)
@@ -611,8 +612,8 @@
     !bind! =command3 (setf succesGlobal 1)
   )
 
-  (spp casserOeufSansCoquille :reward 10)
-  (spp separerOeufSansJaune :reward 5)
-  (spp casserOeufAvecCoquille :reward 10)
-  (spp separerOeufAvecJaune :reward 5)
+  (spp casserOeufSansCoquille :reward 3)
+  (spp separerOeufSansJaune :reward 3)
+  (spp casserOeufAvecCoquille :reward 1)
+  (spp separerOeufAvecJaune :reward 1)
 )
