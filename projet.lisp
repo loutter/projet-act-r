@@ -448,7 +448,7 @@
     ?retrieval>
       buffer      failure
     ==>
-    !bind! =vitesse (+ 5 (act-r-random 15))
+    !bind! =vitesse (+ 15 (act-r-random 10))
     =goal>
       statut      fouetter
       vitesseActuelle =vitesse
@@ -460,7 +460,7 @@
       statut      diminuerVitesse
       vitesseActuelle =vitesse
     ==>
-    !bind! =nouvelleVitesse (- =vitesse 5)
+    !bind! =nouvelleVitesse (- =vitesse 3)
     =goal>
       statut      fouetter
       vitesseActuelle =nouvelleVitesse
