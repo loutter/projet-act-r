@@ -35,7 +35,7 @@
 
   (run-full-time 10)
   
-  (list coquillesGlobal jaunesGlobal succesGlobal)
+  (list (/ coquillesGlobal 4) (/ jaunesGlobal 4) succesGlobal)
 )
 
 (defun learning (n)
@@ -44,6 +44,7 @@
     (dotimes (i n (reverse res))
       (push (experiment) res)
     )
+    ;; (write res)
   )
 )
 
@@ -51,16 +52,12 @@
   (let ((data nil))
     (dotimes (i n)
       (if (null data)
-        (setf data (learning 5))
-        (setf data (mapcar (lambda (x y) (mapcar '+ x y)) data (learning 5)))
+        (setf data (learning 20))
+        (setf data (mapcar (lambda (x y) (mapcar '+ x y)) data (learning 20)))
       )
     )
-    (let ((stats data))
-      (dotimes (i 5)
-        (setf (subseq stats 0 2) (mapcar (lambda (x) (/ x (* 4 n)) (butlast stats)) ))
-        (setf (subseq stats 2 3) (mapcar (lambda (x) (/ x n) (butlast stats)) ))
-      )
-      (draw-graph stats)
+    (let ((percentages (mapcar (lambda (experience) (mapcar (lambda (x) (/ x n)) experience)) data) ))
+      (draw-graph percentages)
     )
   )
 )
@@ -68,7 +65,7 @@
 (defun draw-graph (stats)
   (dotimes (statElement 3)
     (let (points)
-      (dotimes (i 5)
+      (dotimes (i 20)
         (push (nth statElement (nth i stats)) points)
       )
       (setf points (reverse points))
@@ -108,7 +105,7 @@
   (sgp :v nil :show-focus t :trace-detail medium :ul t :ult t)
 
   ;; do not change these parameters
-  (sgp :esc t :bll .5 :ol t :er t :lf 0)
+  (sgp :esc t :egs 2 :bll .5 :ol t :er t :lf 0)
   
   ;; adjust these as needed
   (sgp :ans .2 :mp 10.0 :rt -60)
@@ -614,8 +611,8 @@
     !bind! =command3 (setf succesGlobal 1)
   )
 
-  (spp casserOeufSansCoquille :reward 1)
-  (spp separerOeufSansJaune :reward 1)
-  (spp casserOeufAvecCoquille :reward -1)
-  (spp separerOeufAvecJaune :reward -1)
+  (spp casserOeufSansCoquille :reward 10)
+  (spp separerOeufSansJaune :reward 5)
+  (spp casserOeufAvecCoquille :reward 10)
+  (spp separerOeufAvecJaune :reward 5)
 )
