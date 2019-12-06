@@ -14,7 +14,9 @@ Commande sgp :
   :mp 10.0 
   :rt -60
     
-Liste des fichiers :
+Liste des fichiers Lisp :
     IFT609_blancsEnNeige_Cohen.lisp : - Fichier principal à charger
                                       - Fonctionne sur ACT-R version 7.5
                                       - Contient tout le code de notre modèle
+
+Rendu également disponible sur Github : https://github.com/loutter/projet-act-r
