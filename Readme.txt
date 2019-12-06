@@ -16,4 +16,5 @@ Commande sgp :
     
 Liste des fichiers :
     IFT609_blancsEnNeige_Cohen.lisp : - Fichier principal à charger
+                                      - Fonctionne sur ACT-R version 7.5
                                       - Contient tout le code de notre modèle
