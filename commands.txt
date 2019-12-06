@@ -1,5 +1,6 @@
 Commande d'exécution unitaire :
-    (experiment) ?
+    (experiment) : exécution unitaire d'un modèle
 
-Commande d'exécutions multiples :
-    
+Commandes d'exécutions multiples :
+    (learning X) : exécution de X itérations sur un modèle
+    (show-learning N) : exécution de N modèles sur 20 itérations
