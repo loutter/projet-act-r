@@ -115,22 +115,39 @@
   (chunk-type butAvoirBlancs nbBlancs nbJaunes nbCoquilles statut)
   (chunk-type butObtenirTexture couleurActuelle volumeActuel vitesseActuelle energie statut)
 
-  (chunk-type oeuf blanc jaune coquille)
-  (chunk-type couleur nom valeur)
+  ;; Chunk modélisant l'oeuf réel, non utilisé dans cette version du code mais permettra une éventuelle adaptation future
+  ;;(chunk-type oeuf blanc jaune coquille)
+  
+  ;; Chunk modélisant une couleur, non utilisé dans cette version du code mais permettra une éventuelle adaptation future
+  ;;(chunk-type couleur nom valeur)
+  
+  ;; Chunk modélisant la texture des blancs 
   (chunk-type texture couleur volume)
-  (chunk-type experienceCassage forceActuelle resultat)
+  
+  ;; Chunk modélisant l'apprentissage du modèle pour casser des oeufs selon une force appliquée, non utilisé dans cette version du code mais permettra une éventuelle adaptation future
+  ;;(chunk-type experienceCassage forceActuelle resultat)
+  
+  ;; Chunk modélisant l'apprentissage du modèle pour fouetter correctement la préparation et monter les blancs en neige
   (chunk-type experienceFouettage couleurActuelle volumeActuel vitesseMouvement resultat)
 
   (add-dm
+    ;; But principal : obtenir des blancs en neige
     (goalAvoirBlancsEnNeige ISA butAvoirBlancsEnNeige statut startExperiment)
+   
+    ;; Premier sous-but : obtenir uniquement des blancs
     (goalAvoirBlancs ISA butAvoirBlancs nbBlancs 0 nbJaunes 0 nbCoquilles 0 statut startCassage)
+   
+    ;; Second sous-but : obtenir une texture en neige
     (goalObtenirTexture ISA butObtenirTexture couleurActuelle 0 volumeActuel 0 vitesseActuelle 0 energie 1100 statut startFouettage)
 
-    (oeuf1 ISA oeuf blanc 1 jaune 1 coquille 1)
+    ;; Exemple de chunk oeuf pour une évolution future
+    ;;(oeuf ISA oeuf blanc 1 jaune 1 coquille 1)
 
-    (couleur1 ISA couleur nom transparent valeur 0)
-    (couleur2 ISA couleur nom blanc valeur 200)
+    ;; Exemples de chunks couleur pour une évolution future
+    ;;(couleur1 ISA couleur nom transparent valeur 0)
+    ;;(couleur2 ISA couleur nom blanc valeur 200)
 
+    ;; Chunk de texture parfaite
     (textureParfaite ISA texture couleur 200 volume 100)
    
     (transparent isa chunk) 
@@ -166,7 +183,7 @@
 
   (goal-focus goalAvoirBlancsEnNeige)
 
-  (P start
+  (P start ;; Démarrage du programme : la première chose à faire et de trouver un oeuf pour le casser
     =goal>
       isa         butAvoirBlancsEnNeige
       statut      startExperiment
@@ -176,7 +193,11 @@
       statut      startCassage
   )
 
-  (P startCassage
+;;
+;; Début du but premier sous-but : Obtenir uniquement des blancs d'oeufs
+;;
+  
+  (P startCassage ;; Préparation de la recherche visuelle d'un oeuf dans la fenêtre graphique
     =goal>
       isa         butAvoirBlancs
       statut      startCassage
@@ -188,19 +209,7 @@
       statut      chercherOeuf
   )
 
-  (P passerAuFouettage
-    =goal>
-      isa         butAvoirBlancs
-      statut      chercherOeuf
-    ?visual-location>
-      buffer      failure
-    ==>
-    !bind! =but (goal-focus goalAvoirBlancsEnNeige)
-    =goal>
-      statut      blancsObtenus
-  )
-
-  (P attraperOeuf
+  (P attraperOeuf ;; Cherche visuellement un oeuf dans la fenêtre graphique pour l'attraper
     =goal>
       statut      chercherOeuf
     =visual-location>
@@ -220,7 +229,7 @@
       statut      oeufAttrape
   )
 
- (P casserOeufSansCoquille
+ (P casserOeufSansCoquille ;; Modélise le cassage de l'oeuf sans avoir mis de coquille dans la préparation
     =goal>
       statut      oeufAttrape
       nbCoquilles   =nombreCoquilles
@@ -234,7 +243,7 @@
       statut      oeufCasse
   )
 
-  (P casserOeufAvecCoquille
+  (P casserOeufAvecCoquille ;; Modélise le cassage de l'oeuf en ayant fait tomber des coquilles dans la préparation
     =goal>
       statut      oeufAttrape
       nbCoquilles   =nombreCoquilles
@@ -252,7 +261,20 @@
     !output!        =nouveauNombreCoquille
   )
 
-  (P separerOeufAvecJaune
+  (P separerOeufSansJaune ;; Modélise la séparation du blanc et du jaune sans faire tomber de jaune dans la préparation
+    =goal>
+      statut      oeufCasse
+      nbBlancs    =nombreBlancs
+      nbJaunes    =nombresJaunes
+
+    ==>
+   !bind! =nombre   (+ =nombreBlancs 1)
+    =goal>
+      nbBlancs    =nombre
+      statut      oeufSepare
+  )
+
+   (P separerOeufAvecJaune ;; Modélise la séparation du blanc et du jaune en faisant tomber du jaune dans la préparation
     =goal>
       statut      oeufCasse
       nbBlancs    =nombreBlancs
@@ -266,21 +288,8 @@
       nbBlancs    =nombre
       statut      oeufSepare
   )
-
-  (P separerOeufSansJaune
-    =goal>
-      statut      oeufCasse
-      nbBlancs    =nombreBlancs
-      nbJaunes    =nombresJaunes
-
-    ==>
-   !bind! =nombre   (+ =nombreBlancs 1)
-    =goal>
-      nbBlancs    =nombre
-      statut      oeufSepare
-  )
-
-  (P verifierPasCoquille
+  
+  (P verifierPasCoquille ;; Indique qu'il n'y a pas de coquille dans la préparation
     =goal>
       statut      oeufSepare
       nbCoquilles =nombreCoquilles
@@ -290,7 +299,7 @@
       statut      pasDeCoquille
 
   )
-  (P verifierAvecCoquille
+  (P verifierAvecCoquille ;; Indique la présence de coquilles dans la préparation
     =goal>
       statut      oeufSepare
       nbCoquilles =nombreCoquilles
@@ -300,7 +309,7 @@
       statut      presenceCoquille
   )
 
-  (P retirerCoquille
+  (P retirerCoquille ;; Action de retirer les coquilles de la préparation
     =goal>
     statut presenceCoquille
     nbCoquilles =nombreCoquilles
@@ -311,7 +320,7 @@
     nbCoquilles =nouveauNombreCoquille
     )
 
-    (P retirerCoquilleTermine
+    (P retirerCoquilleTermine ;; Indique qu'il n'y a plus de coquille à retirer pour passer à la suite (séparation du blanc et du jaune)
       =goal>
       statut presenceCoquille
       nbCoquilles 0
@@ -320,8 +329,19 @@
       statut pasDeCoquille
       )
 
-
-  (P verifierAvecJaune
+  (P verifierPasJaune ;; Indique qu'il n'y a pas de jaune dans la préparation
+    =goal>
+    statut      pasDeCoquille
+    nbJaunes    =nombreJaunes
+      !eval!  (< =nombreJaunes 1)
+    ==>
+    =goal>
+    statut      startCassage
+    -visual>
+    -manual>
+  )
+  
+  (P verifierAvecJaune ;; Indique la présence de jaunes dans la préparation
     =goal>
       statut      pasDeCoquille
       nbJaunes    =nombreJaunes
@@ -334,20 +354,7 @@
     -manual>
   )
 
-  (P verifierPasJaune
-    =goal>
-    statut      pasDeCoquille
-    nbJaunes    =nombreJaunes
-      !eval!  (< =nombreJaunes 1)
-    ==>
-    =goal>
-    statut      startCassage
-    -visual>
-    -manual>
-  )
-
-
-  (P retirerJaune
+  (P retirerJaune ;; Action de retirer les jaunes de la préparation
     =goal>
     statut presenceJaune
     nbJaunes =nombreJaunes
@@ -358,7 +365,7 @@
     nbJaunes =nouveauNombreJaunes
     )
 
-  (P retirerJauneTermine
+  (P retirerJauneTermine ;; Indique qu'il n'y a plus de jaune à retirer pour passer à la suite (fouettage des blancs)
     =goal>
     statut presenceJaune
     nbJaunes 0
@@ -367,6 +374,18 @@
     statut      startCassage
     )
 
+  (P passerAuFouettage ;; Permet le changement de but lorsque tous les oeufs sont cassés et séparés
+    =goal>
+      isa         butAvoirBlancs
+      statut      chercherOeuf
+    ?visual-location>
+      buffer      failure
+    ==>
+    !bind! =but (goal-focus goalAvoirBlancsEnNeige)
+    =goal>
+      statut      blancsObtenus
+  )
+  
   (P demarrerFouettage
     =goal>
       ISA         butAvoirBlancsEnNeige
@@ -381,10 +400,10 @@
   )
 
 ;;
-;; Début du but secondaire : Obtenir une texture en neige
+;; Début du second sous-but : Obtenir une texture en neige
 ;;
 
-  (P recupererVitesseSucces ;; récupérer la vitesse d'une précédente tentative en succès comme référence pour cette run 
+  (P recupererVitesseSucces ;; Récupère la vitesse d'une précédente tentative en succès comme référence pour cette run 
     =goal>
       ISA         butObtenirTexture
       statut      startFouettage
@@ -399,7 +418,7 @@
       resultat    succes
   )
 
-  (P recupererVitesseSuccesOK ;; rappel de la vitesse avec la précédente run étant un succès réussi
+  (P recupererVitesseSuccesOK ;; Rappel de la vitesse avec la précédente run étant un succès réussi
     =goal>
       ISA         butObtenirTexture
     =retrieval>
@@ -410,10 +429,10 @@
     =goal>
       statut      fouetter
       vitesseActuelle =vitesse
-    @retrieval> ;; pour vider le buffer sans impacter l'apprentissage
+    @retrieval> ;; Vider le buffer sans impacter l'apprentissage
   )
 
-  (P recupererVitesseSuccesKO ;; échec du rappel de la vitesse avec la précédente run étant un succès
+  (P recupererVitesseSuccesKO ;; Echec du rappel de la vitesse avec la précédente run étant un succès
     =goal>
       ISA         butObtenirTexture
       statut      recupererVitesse
@@ -427,7 +446,7 @@
       resultat    manqueEnergie 
   )
 
-  (P recupererVitesseManqueEnergieOK ;; rappel de la vitesse avec la précédente run étant un manque d'énergie réussi
+  (P recupererVitesseManqueEnergieOK ;; Rappel de la vitesse avec la précédente run étant un manque d'énergie réussi
     =goal>
       ISA         butObtenirTexture
     =retrieval>
@@ -438,10 +457,10 @@
     =goal>
       statut      diminuerVitesse
       vitesseActuelle =vitesse
-    @retrieval> ;; pour vider le buffer sans impacter l'apprentissage
+    @retrieval> ;; Vider le buffer sans impacter l'apprentissage
   )
 
-  (P recupererVitesseManqueEnergieKO ;; échec du rappel de la vitesse, on choisi une vitesse par défaut aléatoire
+  (P recupererVitesseManqueEnergieKO ;; Echec du rappel de la vitesse, on choisit une vitesse par défaut aléatoire
     =goal>
       ISA         butObtenirTexture
       statut      recupererVitesseManqueEnergie
@@ -454,7 +473,7 @@
       vitesseActuelle =vitesse
   )
 
-  (P baisserVitesse ;; Adapter la vitesse d'une précédente run échoué par manque d'énergie en la diminuant un peu
+  (P baisserVitesse ;; Adapte la vitesse d'une précédente run échouée par manque d'énergie en la diminuant légèrement
     =goal>
       ISA         butObtenirTexture
       statut      diminuerVitesse
@@ -466,7 +485,7 @@
       vitesseActuelle =nouvelleVitesse
   )
 
-  (P augmenterVitesse ;; Perfectionner la vitesse d'une précédente run réussi en l'augmentant un peu
+  (P augmenterVitesse ;; Perfectionne la vitesse d'une précédente run réussie en l'augmentant un peu
     =goal>
       ISA         butObtenirTexture
       statut      augmenterVitesse
@@ -478,7 +497,7 @@
       vitesseActuelle =nouvelleVitesse
   )
 
-  (P fouetterClassique ;; foutter de façon classique
+  (P fouetterClassique ;; Foutte de façon classique
     =goal>
       ISA         butObtenirTexture
       statut      fouetter
@@ -497,7 +516,7 @@
       energie         =nouvelleEnergie
   )
 
-  (P verifierTexture ;; récupère la texture parfaite pour comparer avec la texture actuelle
+  (P verifierTexture ;; Récupère la texture parfaite pour comparer avec la texture actuelle
     =goal>
       ISA         butObtenirTexture
       statut      verifierTexture
@@ -510,7 +529,7 @@
       textureParfaite
   )
 
-  (P comparerTextureOK ;; rappel de la texture parfaite réussi et la texture actuelle y est similaire
+  (P comparerTextureOK ;; Rappel de la texture parfaite réussi et comparaison avec la texture actuelle : similaire
     =goal>
       ISA         butObtenirTexture
       statut      comparerTexture
@@ -538,7 +557,7 @@
       resultat          succes
   )
 
-  (P comparerTextureKO ;; rappel de la texture parfaite réussi mais la texture actuelle y est différente
+  (P comparerTextureKO ;; Rappel de la texture parfaite réussi et comparaison avec la texture actuelle : différente
     =goal>
       ISA         butObtenirTexture
       statut      comparerTexture
@@ -556,7 +575,7 @@
       statut      verifierEnergie
   )
 
-  (P verifierEnergieKO ;; il ne reste plus d'énergie au model, on arrête
+  (P verifierEnergieKO ;; Le modèle n'a plus d'énergie, arrêt du fouettage
     =goal>
       ISA         butObtenirTexture
       statut      verifierEnergie
@@ -578,7 +597,7 @@
       resultat          manqueEnergie
   )
 
-  (P verifierEnergieOK ;; il reste encore de l'énergie au model, on continue
+  (P verifierEnergieOK ;; Il reste encore de l'énergie au modèle, on continue à fouetter
     =goal>
       ISA         butObtenirTexture
       statut      verifierEnergie
@@ -588,7 +607,7 @@
       statut      fouetter
   )
 
-  (P finirExperienceEchec ;; on termine l'expérience en vidant le buffer imaginaire pour finaliser l'apprentissage
+  (P finirExperienceEchec ;; On termine l'expérience en vidant le buffer imaginaire pour finaliser l'apprentissage
     =goal>
       ISA         butAvoirBlancsEnNeige
       statut      echec
@@ -600,7 +619,7 @@
     !bind! =command3 (setf succesGlobal 0)
   )
 
-  (P finirExperienceSucces ;; on termine l'expérience en vidant le buffer imaginaire pour finaliser l'apprentissage
+  (P finirExperienceSucces ;; On termine l'expérience en vidant le buffer imaginaire pour finaliser l'apprentissage
     =goal>
       ISA         butAvoirBlancsEnNeige
       statut      succes
